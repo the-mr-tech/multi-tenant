@@ -24,7 +24,7 @@ trait TenantAwareJob
     /**
      * @var int The hostname ID of the previously active tenant.
      */
-    protected $website_id;
+    public $website_id;
 
     use SerializesModels {
         __sleep as serializedSleep;
