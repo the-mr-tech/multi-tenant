@@ -247,6 +247,19 @@ return [
         'auto-create-tenant-database-user' => true,
 
         /**
+         * Set of database privileges to give to the tenant database user.
+         *
+         * @info Useful in case your database restricts the privileges you
+         *       can set (for example AWS RDS).
+         * @info These privileges are only used in case tenant database users
+         *       are set to be created.
+         *
+         * @info null by default means "ALL PRIVILEGES". Override with a list
+         *       of privileges as a string, e.g. 'SELECT, UPDATE'.
+         */
+        'tenant-database-user-privileges' => null,
+
+        /**
          * Automatically rename the tenant database when the random id of the
          * website changes. This should not be too common, but in case it happens
          * we automatically want to move databases accordingly.
@@ -283,6 +296,12 @@ return [
         'force-system-connection-of-models' => [
 //            App\User::class
         ],
+
+        /**
+         * Define the host permission (used only by MySQL/MariaDB) to enable the connection from remote
+         * machines
+         */
+        'tenant-database-user-host-permission' => env('TENANCY_DATABASE_USER_HOST_PERMISSION', '127.0.0.1'),
     ],
 
     /**

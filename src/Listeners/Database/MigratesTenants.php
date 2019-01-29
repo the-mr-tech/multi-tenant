@@ -47,23 +47,28 @@ class MigratesTenants
      */
     public function migrate(WebsiteEvent $event): bool
     {
-        $paths = $this->getMigrationPaths();
+        $paths = $this->connection->getMigrationPaths();
+
+        $migrated_paths = 0;
+        $nonExecutedMigrationsPath = [];
 
         foreach ($paths as $path) {
             if ($path && realpath($path) && $this->connection->migrate($event->website, $path)) {
-                $this->emitEvent(new Events\Websites\Migrated($event->website));
+                $migrated_paths++;
+            } else {
+                $nonExecutedMigrationsPath[] = $path;
             }
         }
 
-        return true;
-    }
-
-    protected function getMigrationPaths()
-    {
-        if (($path = config('tenancy.db.tenant-migrations-path')) && ! empty($path)) {
-            return (array) $path;
+        if ($migrated_paths == count($paths)) {
+            $this->emitEvent(new Events\Websites\Migrated($event->website));
+        } else {
+            throw new \Exception(
+                "Not all migrations were executed. The list of non executed migrations: " .
+                implode(",", $nonExecutedMigrationsPath)
+            );
         }
 
-        return [];
+        return true;
     }
 }

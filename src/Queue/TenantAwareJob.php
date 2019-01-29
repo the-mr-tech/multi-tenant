@@ -24,7 +24,7 @@ trait TenantAwareJob
     /**
      * @var int The hostname ID of the previously active tenant.
      */
-    protected $website_id;
+    public $website_id;
 
     use SerializesModels {
         __sleep as serializedSleep;
@@ -71,6 +71,27 @@ trait TenantAwareJob
     {
         $this->website_id = $website instanceof Model ? $website->getKey() : $website;
 
+        return $this;
+    }
+
+    /**
+     * Manually sets the website_id to the current tenant running
+     * This method was made to work specifically with events/queued listeners.
+     * We need to manually call this method before dispatching an event with his queued listeners.
+     *
+     * @return $this|bool
+     */
+    public function onCurrentTenant()
+    {
+        /** @var Environment $environment */
+        $environment = app(Environment::class);
+
+        $website = $environment->tenant();
+        if (!$website) {
+            return false;
+        }
+
+        $this->website_id = $website->getKey();
         return $this;
     }
 }
